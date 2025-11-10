@@ -13,10 +13,9 @@ export const useAuthRequest = () => {
       setIsLoading(false);
       return result;
     } catch (err) {
-      const errorMessage = err.message || 'An unknown error occurred';
+      setError(err);
       setIsLoading(false);
-      setError(errorMessage);
-      throw new Error(errorMessage);
+      throw err;
     }
   };
 
@@ -24,23 +23,8 @@ export const useAuthRequest = () => {
     isLoading,
     error,
     setError,
-    /**
-     * Registers a new user.
-     * @param {object} userData - email, phone, password, role
-     */
-    register: (userData) =>
-      handleRequest(authService.registerUser, userData),
-
-    /**
-     * Logs in a user.
-     * @param {object} credentials - email, password
-     */
-    login: (credentials) =>
-      handleRequest(authService.loginUser, credentials),
-
-    /**
-     * Logs out a user.
-     */
+    register: (userData) => handleRequest(authService.registerUser, userData),
+    login: (credentials) => handleRequest(authService.loginUser, credentials),
     logout: () => handleRequest(authService.logoutUser),
   };
 };

@@ -1,15 +1,20 @@
 'use client';
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { useJobs } from '@/hooks/useJob';
+import { useAuthRequest } from '@/hooks/useAuthRequest';
 
 export default function JobsTestPage() {
   const { jobs, isLoading, error, createJob } = useJobs();
+  const { logout } = useAuthRequest();
+  const router = useRouter();
 
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [location, setLocation] = useState('');
   const [rate, setRate] = useState('');
+  const [showLogoutModal, setShowLogoutModal] = useState(false);
 
   const handleCreateJob = async (e) => {
     e.preventDefault();
@@ -25,17 +30,54 @@ export default function JobsTestPage() {
     }
   };
 
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-blue-100 to-blue-200 py-8 px-4">
-      <div className="max-w-6xl mx-auto">
-        {/* Header */}
-        <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold text-blue-900 mb-2">Job Board</h1>
-          <p className="text-blue-600">Post and browse available jobs</p>
-        </div>
+  const handleLogout = async () => {
+    try {
+      await logout();
+      setShowLogoutModal(false);
+      router.push('/auth/login');
+    } catch (err) {
+      alert('Logout failed.');
+    }
+  };
 
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-blue-100 to-blue-200 py-8 px-4 relative">
+      {showLogoutModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm">
+          <div className="bg-white rounded-xl shadow-2xl p-8 max-w-sm w-full text-center">
+            <h2 className="text-xl font-bold text-blue-900 mb-4">Confirm Logout</h2>
+            <p className="mb-6 text-blue-700">Are you sure you want to log out?</p>
+            <div className="flex justify-center gap-4">
+              <button
+                onClick={() => setShowLogoutModal(false)}
+                className="px-6 py-2 rounded-lg bg-blue-100 text-blue-700 font-semibold hover:bg-blue-200 transition"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleLogout}
+                className="px-6 py-2 rounded-lg bg-gradient-to-r from-blue-600 to-blue-700 text-white font-semibold hover:from-blue-700 hover:to-blue-800 transition"
+              >
+                Logout
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+      <div className="max-w-6xl mx-auto">
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between text-center mb-8 gap-4">
+          <div>
+            <h1 className="text-4xl font-bold text-blue-900 mb-2">Job Board</h1>
+            <p className="text-blue-600">Post and browse available jobs</p>
+          </div>
+          <button
+            onClick={() => setShowLogoutModal(true)}
+            className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-semibold py-2 px-6 rounded-lg shadow-lg hover:shadow-xl transition-all"
+          >
+            Logout
+          </button>
+        </div>
         <div className="grid lg:grid-cols-2 gap-8">
-          {/* Create Job Form */}
           <div className="bg-white rounded-2xl shadow-xl p-8">
             <div className="flex items-center gap-3 mb-6">
               <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-700 rounded-lg flex items-center justify-center">
@@ -45,7 +87,6 @@ export default function JobsTestPage() {
               </div>
               <h2 className="text-2xl font-bold text-blue-900">Post a Job</h2>
             </div>
-
             <form onSubmit={handleCreateJob} className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-blue-900 mb-1">
@@ -60,7 +101,6 @@ export default function JobsTestPage() {
                   className="w-full px-4 py-3 border border-blue-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition text-black"
                 />
               </div>
-
               <div>
                 <label className="block text-sm font-medium text-blue-900 mb-1">
                   Description
@@ -74,7 +114,6 @@ export default function JobsTestPage() {
                   className="w-full px-4 py-3 border border-blue-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition resize-none text-black"
                 />
               </div>
-
               <div>
                 <label className="block text-sm font-medium text-blue-900 mb-1">
                   Location
@@ -88,7 +127,6 @@ export default function JobsTestPage() {
                   className="w-full px-4 py-3 border border-blue-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition text-black"
                 />
               </div>
-
               <div>
                 <label className="block text-sm font-medium text-blue-900 mb-1">
                   Hourly Rate ($)
@@ -102,7 +140,6 @@ export default function JobsTestPage() {
                   className="w-full px-4 py-3 border border-blue-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition text-black"
                 />
               </div>
-
               <button
                 type="submit"
                 disabled={isLoading}
@@ -112,8 +149,6 @@ export default function JobsTestPage() {
               </button>
             </form>
           </div>
-
-          {/* Jobs List */}
           <div className="space-y-4">
             <div className="flex items-center gap-3 mb-6">
               <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-700 rounded-lg flex items-center justify-center">
@@ -123,16 +158,12 @@ export default function JobsTestPage() {
               </div>
               <h2 className="text-2xl font-bold text-blue-900">Available Jobs</h2>
             </div>
-
-            {/* Loading State */}
             {isLoading && (
               <div className="bg-white rounded-xl shadow-lg p-8 text-center">
                 <div className="inline-block w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
                 <p className="text-blue-600 mt-3">Loading jobs...</p>
               </div>
             )}
-
-            {/* Error State */}
             {error && (
               <div className="bg-red-50 border border-red-200 rounded-xl p-6">
                 <div className="flex items-start gap-3">
@@ -146,8 +177,6 @@ export default function JobsTestPage() {
                 </div>
               </div>
             )}
-
-            {/* Empty State */}
             {!isLoading && jobs.length === 0 && !error && (
               <div className="bg-white rounded-xl shadow-lg p-12 text-center">
                 <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -159,8 +188,6 @@ export default function JobsTestPage() {
                 <p className="text-blue-600">Be the first to post a job!</p>
               </div>
             )}
-
-            {/* Job Cards */}
             {jobs.map((job) => (
               <div key={job._id} className="bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition-shadow">
                 <div className="flex items-start justify-between mb-3">
@@ -169,9 +196,7 @@ export default function JobsTestPage() {
                     ${job.rate}/hr
                   </span>
                 </div>
-                
                 <p className="text-gray-700 mb-4 leading-relaxed">{job.description}</p>
-                
                 <div className="flex items-center gap-4 text-sm text-blue-600">
                   <div className="flex items-center gap-1">
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
