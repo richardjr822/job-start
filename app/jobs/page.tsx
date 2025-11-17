@@ -1,31 +1,39 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, ChangeEvent, FormEvent } from 'react';
 import { useRouter } from 'next/navigation';
-import { useJobs } from '@/hooks/useJob';
+import { useJobs, Job } from '@/hooks/useJob';
 import { useAuthRequest } from '@/hooks/useAuthRequest';
+import JobCard from '@/components/3-organisms/JobCard';
+import Button from '@/components/1-atoms/Button';
+import Input from '@/components/1-atoms/Input';
 
 export default function JobsTestPage() {
   const { jobs, isLoading, error, createJob } = useJobs();
   const { logout } = useAuthRequest();
   const router = useRouter();
 
-  const [title, setTitle] = useState('');
-  const [description, setDescription] = useState('');
-  const [location, setLocation] = useState('');
-  const [rate, setRate] = useState('');
-  const [showLogoutModal, setShowLogoutModal] = useState(false);
+  const [title, setTitle] = useState<string>('');
+  const [description, setDescription] = useState<string>('');
+  const [location, setLocation] = useState<string>('');
+  const [rate, setRate] = useState<string>('');
+  const [showLogoutModal, setShowLogoutModal] = useState<boolean>(false);
 
-  const handleCreateJob = async (e) => {
+  const handleCreateJob = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     try {
-      await createJob({ title, description, location, rate: Number(rate) });
+      await createJob({ 
+        title, 
+        description, 
+        location, 
+        rate: Number(rate) 
+      });
       alert('Job Created!');
       setTitle('');
       setDescription('');
       setLocation('');
       setRate('');
-    } catch (err) {
+    } catch (err: any) {
       alert(`Failed to create job: ${err.message}`);
     }
   };
@@ -48,36 +56,30 @@ export default function JobsTestPage() {
             <h2 className="text-xl font-bold text-blue-900 mb-4">Confirm Logout</h2>
             <p className="mb-6 text-blue-700">Are you sure you want to log out?</p>
             <div className="flex justify-center gap-4">
-              <button
-                onClick={() => setShowLogoutModal(false)}
-                className="px-6 py-2 rounded-lg bg-blue-100 text-blue-700 font-semibold hover:bg-blue-200 transition"
-              >
+              <Button variant="secondary" onClick={() => setShowLogoutModal(false)}>
                 Cancel
-              </button>
-              <button
-                onClick={handleLogout}
-                className="px-6 py-2 rounded-lg bg-gradient-to-r from-blue-600 to-blue-700 text-white font-semibold hover:from-blue-700 hover:to-blue-800 transition"
-              >
+              </Button>
+              <Button variant="danger" onClick={handleLogout}>
                 Logout
-              </button>
+              </Button>
             </div>
           </div>
         </div>
       )}
+
       <div className="max-w-6xl mx-auto">
         <div className="flex flex-col md:flex-row md:items-center md:justify-between text-center mb-8 gap-4">
           <div>
             <h1 className="text-4xl font-bold text-blue-900 mb-2">Job Board</h1>
             <p className="text-blue-600">Post and browse available jobs</p>
           </div>
-          <button
-            onClick={() => setShowLogoutModal(true)}
-            className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-semibold py-2 px-6 rounded-lg shadow-lg hover:shadow-xl transition-all"
-          >
+          <Button variant="primary" onClick={() => setShowLogoutModal(true)}>
             Logout
-          </button>
+          </Button>
         </div>
+
         <div className="grid lg:grid-cols-2 gap-8">
+          {/* Post Job Form */}
           <div className="bg-white rounded-2xl shadow-xl p-8">
             <div className="flex items-center gap-3 mb-6">
               <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-700 rounded-lg flex items-center justify-center">
@@ -87,20 +89,18 @@ export default function JobsTestPage() {
               </div>
               <h2 className="text-2xl font-bold text-blue-900">Post a Job</h2>
             </div>
+
             <form onSubmit={handleCreateJob} className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-blue-900 mb-1">
-                  Job Title
-                </label>
-                <input
-                  type="text"
-                  placeholder="e.g. Senior React Developer"
-                  value={title}
-                  onChange={(e) => setTitle(e.target.value)}
-                  required
-                  className="w-full px-4 py-3 border border-blue-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition text-black"
-                />
-              </div>
+              <Input
+                label="Job Title"
+                type="text"
+                placeholder="e.g. Senior React Developer"
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                required
+                fullWidth
+              />
+
               <div>
                 <label className="block text-sm font-medium text-blue-900 mb-1">
                   Description
@@ -114,41 +114,34 @@ export default function JobsTestPage() {
                   className="w-full px-4 py-3 border border-blue-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition resize-none text-black"
                 />
               </div>
-              <div>
-                <label className="block text-sm font-medium text-blue-900 mb-1">
-                  Location
-                </label>
-                <input
-                  type="text"
-                  placeholder="e.g. Remote, New York, etc."
-                  value={location}
-                  onChange={(e) => setLocation(e.target.value)}
-                  required
-                  className="w-full px-4 py-3 border border-blue-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition text-black"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-blue-900 mb-1">
-                  Hourly Rate ($)
-                </label>
-                <input
-                  type="number"
-                  placeholder="e.g. 50"
-                  value={rate}
-                  onChange={(e) => setRate(e.target.value)}
-                  required
-                  className="w-full px-4 py-3 border border-blue-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition text-black"
-                />
-              </div>
-              <button
-                type="submit"
-                disabled={isLoading}
-                className="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-semibold py-3 rounded-lg shadow-lg hover:shadow-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {isLoading ? 'Posting...' : 'Post Job'}
-              </button>
+
+              <Input
+                label="Location"
+                type="text"
+                placeholder="e.g. Remote, New York, etc."
+                value={location}
+                onChange={(e) => setLocation(e.target.value)}
+                required
+                fullWidth
+              />
+
+              <Input
+                label="Hourly Rate ($)"
+                type="number"
+                placeholder="e.g. 50"
+                value={rate}
+                onChange={(e) => setRate(e.target.value)}
+                required
+                fullWidth
+              />
+
+              <Button type="submit" isLoading={isLoading} variant="primary" fullWidth>
+                Post Job
+              </Button>
             </form>
           </div>
+
+          {/* Available Jobs */}
           <div className="space-y-4">
             <div className="flex items-center gap-3 mb-6">
               <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-700 rounded-lg flex items-center justify-center">
@@ -158,12 +151,14 @@ export default function JobsTestPage() {
               </div>
               <h2 className="text-2xl font-bold text-blue-900">Available Jobs</h2>
             </div>
+
             {isLoading && (
               <div className="bg-white rounded-xl shadow-lg p-8 text-center">
                 <div className="inline-block w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
                 <p className="text-blue-600 mt-3">Loading jobs...</p>
               </div>
             )}
+
             {error && (
               <div className="bg-red-50 border border-red-200 rounded-xl p-6">
                 <div className="flex items-start gap-3">
@@ -177,6 +172,7 @@ export default function JobsTestPage() {
                 </div>
               </div>
             )}
+
             {!isLoading && jobs.length === 0 && !error && (
               <div className="bg-white rounded-xl shadow-lg p-12 text-center">
                 <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -188,25 +184,9 @@ export default function JobsTestPage() {
                 <p className="text-blue-600">Be the first to post a job!</p>
               </div>
             )}
-            {jobs.map((job) => (
-              <div key={job._id} className="bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition-shadow">
-                <div className="flex items-start justify-between mb-3">
-                  <h3 className="text-xl font-bold text-blue-900">{job.title}</h3>
-                  <span className="bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-sm font-semibold">
-                    ${job.rate}/hr
-                  </span>
-                </div>
-                <p className="text-gray-700 mb-4 leading-relaxed">{job.description}</p>
-                <div className="flex items-center gap-4 text-sm text-blue-600">
-                  <div className="flex items-center gap-1">
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                    </svg>
-                    <span className="font-medium">{job.location}</span>
-                  </div>
-                </div>
-              </div>
+
+            {jobs.map((job: Job) => (
+              <JobCard key={job._id} job={job} showActions={false} />
             ))}
           </div>
         </div>
