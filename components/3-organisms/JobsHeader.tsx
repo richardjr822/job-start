@@ -101,9 +101,13 @@ export default function JobsHeader({ activeTab, onTabChange }: JobsHeaderProps) 
     <>
       {showLogoutModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm">
-          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-2xl p-8 max-w-sm w-full text-center">
-            <h2 className="text-xl font-bold text-blue-900 dark:text-blue-100 mb-4">Confirm Logout</h2>
-            <p className="mb-6 text-blue-700 dark:text-blue-300">Are you sure you want to log out?</p>
+          <div style={{
+            backgroundColor: 'var(--nav-bg)',
+            color: 'var(--text-color)',
+            borderColor: 'var(--border-color)'
+          }} className="rounded-xl shadow-2xl p-8 max-w-sm w-full text-center border">
+            <h2 style={{ color: 'var(--text-color)' }} className="text-xl font-bold mb-4">Confirm Logout</h2>
+            <p style={{ color: 'var(--text-color)', opacity: 0.8 }} className="mb-6">Are you sure you want to log out?</p>
             <div className="flex justify-center gap-4">
               <Button variant="secondary" onClick={() => setShowLogoutModal(false)}>
                 Cancel
